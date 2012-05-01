@@ -13,11 +13,15 @@ using System.Collections.Generic;
 //testando update do git
 namespace Shooter
 {
+    enum EstadoJogo { Parado, Menu, Jogando, Pontuacao };
+
     /// <summary>
     /// This is the main type for your game
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        EstadoJogo estado;
+
         Texture2D projectileTexture;
         List<Projectile> projectiles;
 
@@ -44,6 +48,9 @@ namespace Shooter
 
         // Image used to display the static background
         Texture2D mainBackground;
+
+        Texture2D mainMenuImage;
+        Texture2D imagemGameOver;
 
         // Parallaxing Layers
         ParallaxBackground bgLayer1;
@@ -72,6 +79,9 @@ namespace Shooter
         int score;
         // The font used to display UI elements
         SpriteFont font;
+
+        int posicaoCursor;
+        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -86,6 +96,7 @@ namespace Shooter
         /// </summary>
         protected override void Initialize()
         {
+            posicaoCursor = 0;
             // TODO: Add your initialization logic here
             player = new Player();
             // Set a constant player move speed
@@ -113,6 +124,9 @@ namespace Shooter
             fireTime = TimeSpan.FromSeconds(.15f);
             //Set player's score to zero
             score = 0;
+            estado = EstadoJogo.Menu;
+
+
             base.Initialize();
         }
 
@@ -152,6 +166,10 @@ namespace Shooter
             // Load the score font
             font = Content.Load<SpriteFont>("gameFont");
             mainBackground = Content.Load<Texture2D>("mainbackground");
+
+            
+            mainMenuImage = Content.Load<Texture2D>("mainMenu");
+            imagemGameOver = Content.Load<Texture2D>("endMenu");
             // TODO: use this.Content to load your game content here
         }
 
@@ -171,11 +189,6 @@ namespace Shooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-
-            // Save the previous state of the keyboard and game pad so we can determinesingle key/button presses
             previousGamePadState = currentGamePadState;
             previousKeyboardState = currentKeyboardState;
 
@@ -183,23 +196,87 @@ namespace Shooter
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
 
+            switch(estado) {
+                case EstadoJogo.Menu:
+                    updateMenuPrincipal();
 
-            //Update the player
-            UpdatePlayer(gameTime);
-            bgLayer1.Update();
-            bgLayer2.Update();
-            // Update the enemies
-            UpdateEnemies(gameTime);
+                    break;
 
-            // Update the projectiles
-            UpdateProjectiles();
-             // Update the explosions
-            UpdateExplosions(gameTime);
+                case EstadoJogo.Jogando:
 
-            // Update the collision
-            UpdateCollision();
-           
-            base.Update(gameTime);
+                    // Allows the game to exit
+                    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                        this.Exit();
+
+                    if (currentKeyboardState.IsKeyDown(Keys.Escape))
+                        this.estado = EstadoJogo.Pontuacao;
+                        
+
+                    // Save the previous state of the keyboard and game pad so we can determinesingle key/button presses
+                    
+
+                    //Update the player
+                    UpdatePlayer(gameTime);
+                    bgLayer1.Update();
+                    bgLayer2.Update();
+                    // Update the enemies
+                    UpdateEnemies(gameTime);
+
+                    // Update the projectiles
+                    UpdateProjectiles();
+                    // Update the explosions
+                    UpdateExplosions(gameTime);
+
+                    // Update the collision
+                    UpdateCollision();
+                    
+
+                    base.Update(gameTime);
+                    break;
+
+                case EstadoJogo.Parado:
+                    this.Exit();
+                    break;
+
+                case EstadoJogo.Pontuacao:
+
+
+                    updatePontuacao();
+                    break;
+            }
+        }
+
+        private void updateMenuPrincipal()
+        {
+            if (currentKeyboardState.IsKeyDown(Keys.Down) || currentGamePadState.DPad.Up == ButtonState.Pressed)
+            {
+                if (this.posicaoCursor == 0)
+                    posicaoCursor++;
+            }
+            if (currentKeyboardState.IsKeyDown(Keys.Up) || currentGamePadState.DPad.Down == ButtonState.Pressed)
+            {
+                if (this.posicaoCursor == 1)
+                    posicaoCursor--;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.Enter))
+            {
+                score = 0;
+                if (posicaoCursor == 0)
+                    estado = EstadoJogo.Jogando;
+                else
+                    estado = EstadoJogo.Parado;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.Escape))
+                estado = EstadoJogo.Parado;
+
+        }
+
+        private void updatePontuacao()
+        {
+            if (currentKeyboardState.IsKeyDown(Keys.Space))
+                this.estado = EstadoJogo.Menu;
         }
 
         private void UpdatePlayer(GameTime gameTime)
@@ -256,9 +333,17 @@ namespace Shooter
             // reset score if player health goes to zero
             if (player.Health <= 0)
             {
+                estado = EstadoJogo.Pontuacao;
+                limparObjetosTela();
                 player.Health = 100;
-                score = 0;
             }
+        }
+
+        private void limparObjetosTela()
+        {
+            projectiles.Clear();
+            explosions.Clear();
+            enemies.Clear();
         }
 
         private void AddEnemy()
@@ -384,42 +469,72 @@ namespace Shooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // Start drawing
             spriteBatch.Begin();
 
-            spriteBatch.Draw(mainBackground, Vector2.Zero, Color.White);
-
-            // Draw the moving background
-            bgLayer1.Draw(spriteBatch);
-            bgLayer2.Draw(spriteBatch);
-
-            // Draw the Player
-            player.Draw(spriteBatch);
-
-            // Draw the Enemies
-            for (int i = 0; i < enemies.Count; i++)
+            switch (estado)
             {
-                enemies[i].Draw(spriteBatch);
-            }
 
-            // Draw the Projectiles
-            for (int i = 0; i < projectiles.Count; i++)
-            {
-                projectiles[i].Draw(spriteBatch);
-            }
+                case EstadoJogo.Jogando:
+                    spriteBatch.Draw(mainBackground, Vector2.Zero, Color.White);
 
-            // Draw the score
-            spriteBatch.DrawString(font, "score: " + score, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y), Color.White);
-            // Draw the player health
-            spriteBatch.DrawString(font, "health: " + player.Health, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + 30), Color.White);
+                    // Draw the moving background
+                    bgLayer1.Draw(spriteBatch);
+                    bgLayer2.Draw(spriteBatch);
 
-            // Draw the explosions
-            for (int i = 0; i < explosions.Count; i++)
-            {
-                explosions[i].Draw(spriteBatch);
+                    // Draw the Player
+                    player.Draw(spriteBatch);
+
+                    // Draw the Enemies
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].Draw(spriteBatch);
+                    }
+
+                    // Draw the Projectiles
+                    for (int i = 0; i < projectiles.Count; i++)
+                    {
+                        projectiles[i].Draw(spriteBatch);
+                    }
+
+                    // Draw the score
+                    spriteBatch.DrawString(font, "score: " + score, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y), Color.White);
+                    // Draw the player health
+                    spriteBatch.DrawString(font, "health: " + player.Health, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + 30), Color.White);
+
+                    // Draw the explosions
+                    for (int i = 0; i < explosions.Count; i++)
+                    {
+                        explosions[i].Draw(spriteBatch);
+                    }
+                    break;
+
+                case EstadoJogo.Menu:
+                    spriteBatch.Draw(mainMenuImage, Vector2.Zero, Color.White);
+
+                    spriteBatch.DrawString(font, "Comecar", new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X+300, GraphicsDevice.Viewport.TitleSafeArea.Y+300), Color.White);
+                    
+                    spriteBatch.DrawString(font, "Sair", new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X + 300, GraphicsDevice.Viewport.TitleSafeArea.Y + 330), Color.White);
+                    if(posicaoCursor == 0)
+                        spriteBatch.DrawString(font, ">>>", new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X + 250, GraphicsDevice.Viewport.TitleSafeArea.Y + 300), Color.White);
+                    else
+                        spriteBatch.DrawString(font, ">>>", new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X + 250, GraphicsDevice.Viewport.TitleSafeArea.Y + 330), Color.White);
+
+                    break;
+
+                case EstadoJogo.Pontuacao:
+                    spriteBatch.Draw(imagemGameOver, Vector2.Zero, Color.White);
+
+                    spriteBatch.DrawString(font, "Pontuacao final : " + score, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X+300, GraphicsDevice.Viewport.TitleSafeArea.Y+300), Color.White);
+                    // Draw the player health
+                    spriteBatch.DrawString(font, "FIM DE JOGO MANO!!!: ", new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X+300, GraphicsDevice.Viewport.TitleSafeArea.Y + 330), Color.White);
+
+                    break;
+
             }
+            
             // Stop drawing
             spriteBatch.End();
 
