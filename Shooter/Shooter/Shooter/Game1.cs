@@ -60,6 +60,8 @@ namespace Shooter
         ParallaxBackground bgLayer2;
         // Enemies
         Texture2D enemyTexture;
+        Texture2D enemyTexture2;
+        Texture2D enemyTexture3;
         List<Enemy> enemies;
 
         // The rate at which the enemies appear
@@ -145,6 +147,8 @@ namespace Shooter
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             enemyTexture = Content.Load<Texture2D>("mineAnimation");
+            enemyTexture2 = Content.Load<Texture2D>("tiraOvni");
+            enemyTexture3 = Content.Load<Texture2D>("tiraOvni2");
             // Load the player resources
             Animation playerAnimation = new Animation();
             Texture2D playerTexture = Content.Load<Texture2D>("shipAnimation");
@@ -379,6 +383,27 @@ namespace Shooter
             // Add the enemy to the active enemies list
             enemies.Add(enemy);
         }
+
+        private void AddEnemyOvni(Texture2D ovni)
+        {
+            // Create the animation object
+            Animation enemyAnimation = new Animation();
+
+            // Initialize the animation with the correct animation information
+            enemyAnimation.Initialize(ovni, Vector2.Zero, 46, 40, 16, 30, Color.White, 1f, true);
+
+            // Randomly generate the position of the enemy
+            Vector2 position = new Vector2(GraphicsDevice.Viewport.Width + enemyTexture.Width / 2, random.Next(100, GraphicsDevice.Viewport.Height - 100));
+
+            // Create an enemy
+            Enemy enemy = new Enemy();
+
+            // Initialize the enemy
+            enemy.Initialize(enemyAnimation, position);
+
+            // Add the enemy to the active enemies list
+            enemies.Add(enemy);
+        }
        
         private void UpdateEnemies(GameTime gameTime)
         {
@@ -394,6 +419,8 @@ namespace Shooter
 
                 // Add an Enemy
                 AddEnemy();
+                AddEnemyOvni(enemyTexture2);
+                AddEnemyOvni(enemyTexture3);
             }
 
             // Update the Enemies
