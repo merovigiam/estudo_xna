@@ -410,17 +410,27 @@ namespace Shooter
             
             // Spawn a new enemy enemy every 1.5 seconds
 
-           // if (score % 200 == 0 && (enemySpawnTime - new TimeSpan(0.1f) ) > 0.0)
+            
              //       enemySpawnTime =  enemySpawnTime - new TimeSpan(0.1f);
 
-            if (gameTime.TotalGameTime - previousSpawnTime > enemySpawnTime)
+
+            if (gameTime.TotalGameTime - previousSpawnTime > enemySpawnTime || random.Next(100)%100 < 6)
             {
                 previousSpawnTime = gameTime.TotalGameTime;
-
                 // Add an Enemy
-                AddEnemy();
-                AddEnemyOvni(enemyTexture2);
-                AddEnemyOvni(enemyTexture3);
+
+                switch (random.Next() % 3)
+                {
+                    case 0:
+                        AddEnemy();
+                        break;
+                    case 1:
+                        AddEnemyOvni(enemyTexture2);
+                        break;
+                    case 2:
+                        AddEnemyOvni(enemyTexture3);
+                        break;
+                }
             }
 
             // Update the Enemies
