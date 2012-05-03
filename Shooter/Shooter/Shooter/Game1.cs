@@ -13,6 +13,9 @@ using System.Collections.Generic;
 //testando update do git
 namespace Shooter
 {
+    /// <summary>
+    /// Estados possiveis que o jogo pode entrar
+    /// </summary>
     enum EstadoJogo { Parado, Menu, Jogando, Pontuacao };
 
     /// <summary>

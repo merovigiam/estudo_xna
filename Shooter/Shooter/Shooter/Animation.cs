@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Shooter
 {
+    /// <summary>
+    /// Classe que possibilita a utilização de um spritesheet como um objeto na tela que seja animado automaticamente por esta classe
+    /// </summary>
     class Animation
     {
         // The image representing the collection of images used for animation

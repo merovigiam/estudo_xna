@@ -7,6 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Shooter
 {
+    /// <summary>
+    /// Classe que representa o jogador
+    /// </summary>
     class Player
     {
 

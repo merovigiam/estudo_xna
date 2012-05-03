@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Shooter
 {
+    /// <summary>
+    /// Classe que representa um projetil
+    /// </summary>
     class Projectile
     {
         // Image representing the Projectile
@@ -42,7 +45,7 @@ namespace Shooter
         public void Initialize(Viewport viewport, Texture2D texture, Vector2 position)
         {
             Texture = texture;
-            Vector2 novaPosi = new Vector2(position.X + 50, position.Y + 34); //daonde sai +50 em x... mentira, era para ser 100
+            Vector2 novaPosi = new Vector2(position.X, position.Y); //daonde sai +50 em x... mentira, era para ser 100
 
             Position = novaPosi;
             this.viewport = viewport;

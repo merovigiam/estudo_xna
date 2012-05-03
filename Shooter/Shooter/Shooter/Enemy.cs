@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Shooter
 {
+    /// <summary>
+    /// Classe que representa os inimigos que aparecem no jogo
+    /// </summary>
     class Enemy
     {
         // Animation representing the enemy

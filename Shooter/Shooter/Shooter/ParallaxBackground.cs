@@ -5,6 +5,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Shooter
 {
+
+    /// <summary>
+    /// Classe que representa um fundo que utiliza o efeito de paralaxe
+    /// </summary>
     class ParallaxBackground
     {
         // The image representing the parallaxing background
