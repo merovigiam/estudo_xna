@@ -81,6 +81,8 @@ namespace Shooter
         SpriteFont font;
 
         int posicaoCursor;
+
+        int nivelTiro;
         
         public Game1()
         {
@@ -96,6 +98,7 @@ namespace Shooter
         /// </summary>
         protected override void Initialize()
         {
+            nivelTiro = 1;
             posicaoCursor = 0;
             // TODO: Add your initialization logic here
             player = new Player();
@@ -319,6 +322,12 @@ namespace Shooter
             player.Position.X = MathHelper.Clamp(player.Position.X, 0, GraphicsDevice.Viewport.Width - player.Width);
             player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, GraphicsDevice.Viewport.Height - player.Height);
 
+            if (nivelTiro == 1 && score > 1000)
+                nivelTiro++;
+            if (nivelTiro == 2 && score > 2000)
+                nivelTiro++;
+            
+
             // Fire only every interval we set as the fireTime
             if (gameTime.TotalGameTime - previousFireTime > fireTime)
             {
@@ -328,13 +337,14 @@ namespace Shooter
                 // Add the projectile, but add it to the front and center of the player
                 // Play the laser sound
                 laserSound.Play();
-                AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+                AddProjectile(player.Position);
             }
             // reset score if player health goes to zero
             if (player.Health <= 0)
             {
                 estado = EstadoJogo.Pontuacao;
                 limparObjetosTela();
+                nivelTiro = 1;
                 player.Health = 100;
             }
         }
@@ -369,7 +379,12 @@ namespace Shooter
        
         private void UpdateEnemies(GameTime gameTime)
         {
+            
             // Spawn a new enemy enemy every 1.5 seconds
+
+           // if (score % 200 == 0 && (enemySpawnTime - new TimeSpan(0.1f) ) > 0.0)
+             //       enemySpawnTime =  enemySpawnTime - new TimeSpan(0.1f);
+
             if (gameTime.TotalGameTime - previousSpawnTime > enemySpawnTime)
             {
                 previousSpawnTime = gameTime.TotalGameTime;
@@ -543,9 +558,43 @@ namespace Shooter
 
         private void AddProjectile(Vector2 position)
         {
-            Projectile projectile = new Projectile();
-            projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position);
-            projectiles.Add(projectile);
+            Projectile projectile;
+            switch (nivelTiro)
+            {
+                case 0:
+                case 1:
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,35));
+                    projectiles.Add(projectile);
+                    break;
+
+                case 2:
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,0));
+                    projectiles.Add(projectile);
+
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,70));
+                    projectiles.Add(projectile);
+
+                    break;
+
+                case 3:
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,0));
+                    projectiles.Add(projectile);
+
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,35));
+                    projectiles.Add(projectile);
+
+                    projectile = new Projectile();
+                    projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position + new Vector2(100,70));
+                    projectiles.Add(projectile);
+
+
+                    break;
+            }
         }
 
         private void UpdateProjectiles()
